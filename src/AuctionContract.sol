@@ -2,11 +2,14 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+import {console} from "forge-std/console.sol";
+
 contract AuctionContract{
     address public owner;
     uint public startingAmount;
     uint public maxAmount;
     address public  highestBidder;
+    address public previousBidderAddress;
 
      bool endAuction ;
 
@@ -38,21 +41,26 @@ contract AuctionContract{
 
 
     function refund(address previousBidder, uint amount) internal  auctionOngoing{
+
+        previousBidderAddress=previousBidder;
        
         payable (previousBidder).transfer(amount);
+
+
 
         emit RefundIssued(previousBidder, amount);
 
     }
 
-    function bid() public payable  auctionOngoing {
+    function bid(uint value) public payable  auctionOngoing {
          require(msg.sender != owner, "Owner cannot place bids");
-        require(msg.value>maxAmount,"Bid the amount higher the current highest bid");
+        require(value>maxAmount,"Bid the amount higher the current highest bid");
         if(highestBidder!=address(0)){
             refund(highestBidder, maxAmount);
         }
 
-        maxAmount=msg.value;
+        maxAmount=value;
+        console.logAddress(msg.sender);
         highestBidder=msg.sender;
         emit NewBid(highestBidder,maxAmount);
 
