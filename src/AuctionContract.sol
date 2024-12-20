@@ -10,8 +10,7 @@ contract AuctionContract{
     uint public maxAmount;
     address public  highestBidder;
     address public previousBidderAddress;
-
-     bool endAuction ;
+    bool public endAuction;
 
      event NewBid(address indexed bidder,uint amount);
      event AuctionEnded(address winner,uint amount);
@@ -43,8 +42,11 @@ contract AuctionContract{
     function refund(address previousBidder, uint amount) internal  auctionOngoing{
 
         previousBidderAddress=previousBidder;
+
+        
        
         payable (previousBidder).transfer(amount);
+        console.log("success");
 
 
 
@@ -56,6 +58,7 @@ contract AuctionContract{
          require(msg.sender != owner, "Owner cannot place bids");
         require(value>maxAmount,"Bid the amount higher the current highest bid");
         if(highestBidder!=address(0)){
+            console.logAddress(highestBidder);
             refund(highestBidder, maxAmount);
         }
 
@@ -75,9 +78,19 @@ contract AuctionContract{
 
     function endFunc() public  onlyOwner auctionOngoing{
         endAuction=true;
+
+        console.log("this is: ",owner);
+         console.log("Contract balance before transfer:", address(this).balance);
+        require(address(this).balance >= maxAmount, "Insufficient contract balance");
+
+
         
-        if(maxAmount!=startingAmount){
-            payable (owner).transfer(maxAmount);
+
+        
+        if(maxAmount>startingAmount){
+             console.log("Transferring funds to owner:", maxAmount);
+             (bool success, ) = payable(owner).call{value: maxAmount}("");
+           require(success, "Transfer to owner failed");
         }
         emit AuctionEnded(highestBidder, maxAmount);
        
