@@ -17,8 +17,8 @@ contract AuctionContract{
      event RefundIssued(address indexed refund, uint amount);
     
 
-    constructor(uint _startingAmount) payable {
-        owner=msg.sender;
+    constructor(uint _startingAmount, address _owner) payable {
+        owner=_owner;
         startingAmount=_startingAmount;
         maxAmount=startingAmount;
         highestBidder=address(0);
@@ -89,8 +89,7 @@ contract AuctionContract{
         
         if(maxAmount>startingAmount){
              console.log("Transferring funds to owner:", maxAmount);
-             (bool success, ) = payable(owner).call{value: maxAmount}("");
-           require(success, "Transfer to owner failed");
+             payable (owner).transfer(maxAmount);
         }
         emit AuctionEnded(highestBidder, maxAmount);
        
