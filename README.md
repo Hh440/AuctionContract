@@ -1,39 +1,101 @@
-# <h1 align="center"> Forge Template </h1>
+# Auction Contract
 
-**Template repository for getting started quickly with Foundry projects**
+This repository contains the implementation of a smart contract for conducting auctions on the Ethereum blockchain. The contract is written in Solidity and enables the creation of simple timed auctions where participants can bid, and the highest bidder wins when the auction ends.
 
-![Github Actions](https://github.com/foundry-rs/forge-template/workflows/CI/badge.svg)
+## Features
 
-## Getting Started
+- **Start and End Auctions**: The contract allows defining a specific duration for the auction.
+- **Place Bids**: Participants can place bids, and the highest bidder is tracked.
+- **Withdraw Overbid**: Non-winning bidders can withdraw their funds after the auction ends.
+- **Transfer Ownership**: The auction creator can transfer ownership of the auctioned item to the winner.
 
-Click "Use this template" on [GitHub](https://github.com/foundry-rs/forge-template) to create a new repository with this repo as the initial state.
+## Requirements
 
-Or, if your repo already exists, run:
-```sh
-forge init
-forge build
+- **Ethereum Development Environment**: A local or remote Ethereum network.
+- **Node.js and npm**: For managing dependencies and scripts.
+- **Solidity**: The contract is written in Solidity (recommended version: `^0.8.0`).
+- **Foundry**: For deploying and testing the contract.
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Hh440/AuctionContract.git
+   cd AuctionContract
+   ```
+
+2. Install Foundry:
+   ```bash
+   curl -L https://foundry.paradigm.xyz | bash
+   foundryup
+   ```
+
+3. Compile the smart contract:
+   ```bash
+   forge build
+   ```
+
+## Deployment
+
+Deploy the contract to a local or test Ethereum network using Foundry:
+
+```bash
+forge script script/Deploy.s.sol:Deploy --rpc-url <network-url> --private-key <private-key>
+```
+
+Replace `<network-url>` with the appropriate network (e.g., `localhost`, `goerli`, etc.) and `<private-key>` with your wallet's private key.
+
+## Usage
+
+### Interacting with the Contract
+
+1. **Create an Auction**
+   The auction creator can start an auction by specifying the duration and initial parameters. The details are set during contract deployment.
+
+2. **Place a Bid**
+   Bidders can place their bids by sending Ether to the contract using the `bid` function.
+
+   Example in JavaScript:
+   ```javascript
+   const tx = await contract.bid({ value: ethers.utils.parseEther("1.0") });
+   await tx.wait();
+   ```
+
+3. **End Auction**
+   The auction ends automatically after the defined duration. The owner can call the `endAuction` function to finalize the process.
+
+4. **Withdraw Funds**
+   Non-winning participants can withdraw their bids by calling the `withdraw` function.
+
+## Testing
+
+Run the tests using Foundry:
+
+```bash
 forge test
 ```
 
-## Writing your first test
+## Contract Functions
 
-All you need is to `import forge-std/Test.sol` and then inherit it from your test contract. Forge-std's Test contract comes with a pre-instatiated [cheatcodes environment](https://book.getfoundry.sh/cheatcodes/), the `vm`. It also has support for [ds-test](https://book.getfoundry.sh/reference/ds-test.html)-style logs and assertions. Finally, it supports Hardhat's [console.log](https://github.com/brockelmore/forge-std/blob/master/src/console.sol). The logging functionalities require `-vvvv`.
+### Public Functions
 
-```solidity
-pragma solidity 0.8.10;
+- `startAuction(uint _biddingTime)`: Starts the auction with a specific duration.
+- `bid()`: Allows participants to place bids.
+- `endAuction()`: Ends the auction and determines the winner.
+- `withdraw()`: Allows non-winning bidders to withdraw their funds.
 
-import "forge-std/Test.sol";
+### Events
 
-contract ContractTest is Test {
-    function testExample() public {
-        vm.roll(100);
-        console.log(1);
-        emit log("hi");
-        assertTrue(true);
-    }
-}
-```
+- `AuctionStarted(address owner, uint endTime)`
+- `BidPlaced(address bidder, uint amount)`
+- `AuctionEnded(address winner, uint amount)`
 
-## Development
+## Security Considerations
 
-This project uses [Foundry](https://getfoundry.sh). See the [book](https://book.getfoundry.sh/getting-started/installation.html) for instructions on how to install and use Foundry.
+- Ensure only authorized users can start an auction.
+- Avoid reentrancy attacks in the `withdraw` function by using the Checks-Effects-Interactions pattern.
+- Handle edge cases like zero bids gracefully.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
